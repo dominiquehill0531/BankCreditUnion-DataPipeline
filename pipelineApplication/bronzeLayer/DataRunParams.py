@@ -1,11 +1,16 @@
+"""
+
+"""
+
 from datetime import datetime
 
 currentDate = datetime.today().strftime('%Y-%m-%d')
-prevRunStr = "2023-06-30"
+prevRunStr = "2023-06-30"  # Currently set for development testing
+# prevRunStr = [Get from pipelineApplication/runLog.txt]
 currentMo = datetime.today().strftime('%m')
 
 
-class DataRunParams:  # TODO: Create prevRun log file to autoincrement defaults
+class DataRunParams:  # TODO: Create runLog file to autoincrement defaults
     # Default changes with each run
     currentRun = currentDate
     prevRun = prevRunStr
