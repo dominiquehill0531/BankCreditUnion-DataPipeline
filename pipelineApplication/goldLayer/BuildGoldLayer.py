@@ -134,7 +134,7 @@ class TableDataDFs:
     # Explore Deposits over Time
     @staticmethod
     def quarterly_deposits_table(): return select_sort_dated_cols(
-        compile_quarterly_assets_table(),
+        compile_quarterly_deposits_table(),
         ["charter_number", "institution_type", "name"],
         True)
 
