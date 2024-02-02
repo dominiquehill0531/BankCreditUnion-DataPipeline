@@ -845,7 +845,8 @@
 
 <details class="contains" open>
   <summary>Contains</summary>
-  <p>DataRunParams class definition and custom initialization logic..</p>
+  <p>runLog: list[str] - list of strings derived from text document log of previous run date strings.
+DataRunParams class definition and custom initialization logic.</p>
 </details>
   
 
@@ -968,10 +969,7 @@
 
             <details class="quote">
               <summary>Source code in <code>pipelineApplication\bronzeLayer\DataRunParams.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -1033,7 +1031,10 @@
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DataRunParams</span><span class="p">:</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DataRunParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class representing an object that holds and manages parameters for each run of data pipeline.</span>
 
@@ -1061,11 +1062,11 @@
 <span class="sd">        Constructs all dynamic attributes of the DataRunParams object without constant default values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currentRun</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;runLog.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="k">as</span> <span class="n">runLog</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span> <span class="o">=</span> <span class="n">runLog</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span> <span class="o">=</span> <span class="n">runLog</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">prev_run_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qtrYear</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prev_run_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qtr</span> <span class="o">=</span> <span class="n">moNumQtrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prev_run_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m&#39;</span><span class="p">)))</span>
+        <span class="n">runLog</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1131,25 +1132,25 @@
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\DataRunParams.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
-<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs all dynamic attributes of the DataRunParams object without constant default values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">currentRun</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;runLog.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="k">as</span> <span class="n">runLog</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span> <span class="o">=</span> <span class="n">runLog</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span> <span class="o">=</span> <span class="n">runLog</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">prev_run_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prevRun</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">qtrYear</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prev_run_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">qtr</span> <span class="o">=</span> <span class="n">moNumQtrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prev_run_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m&#39;</span><span class="p">)))</span>
+    <span class="n">runLog</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1173,13 +1174,13 @@
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\DataRunParams.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">increment_bank_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">increment_bank_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increments select attribute values needed for querying FDIC bank data API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1209,15 +1210,15 @@
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\DataRunParams.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">increment_cred_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">increment_cred_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increments select attribute values needed to request and process credit union data reports from the NCUA.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1273,10 +1274,7 @@
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\DataRunParams.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -1286,7 +1284,10 @@
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
-<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prints string listing current values of DataRunParams object attributes for development purposes.</span>
 
@@ -1479,7 +1480,7 @@
 <span class="sd">        String used in FDIC API query to designate range of charter numbers to search.</span>
 <span class="sd">   &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CERT:[</span><span class="si">{</span><span class="n">start_cert</span><span class="si">}</span><span class="s2"> TO </span><span class="si">{</span><span class="n">stop_cert</span><span class="si">}</span><span class="s2">] AND &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;REPDTE:[</span><span class="si">{</span><span class="n">DataRunParams</span><span class="o">.</span><span class="n">prevRun</span><span class="si">}</span><span class="s2"> TO </span><span class="si">{</span><span class="n">run_params</span><span class="o">.</span><span class="n">currentRun</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="sa">f</span><span class="s2">&quot;REPDTE:[</span><span class="si">{</span><span class="n">run_params</span><span class="o">.</span><span class="n">prevRun</span><span class="si">}</span><span class="s2"> TO </span><span class="si">{</span><span class="n">run_params</span><span class="o">.</span><span class="n">currentRun</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
