@@ -3,7 +3,7 @@ import os
 import pyspark.sql.functions as F
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.session import SparkSession
-from pyspark.sql.types import IntegerType, LongType
+from pyspark.sql.types import IntegerType, LongType, StructType, StringType, StructField
 
 from pipelineApplication.Helpers_FunctionsDicts import value_via_dict
 from pipelineApplication.silverLayer.StateAbbreviationDict import states
@@ -39,16 +39,33 @@ logger.LogManager.getLogger("org.apache.spark.SparkEnv").setLevel(logger.Level.E
 s3_devpt_url = "s3a://dhill-personal-devpt/alpharank-interview-pipeline"
 stAbbrevMap = states
 b = sc.broadcast(stAbbrevMap)
+institutionSchema = StructType([
+    StructField("ACTIVE", StringType(), nullable=False),
+    StructField("CERT", StringType(), nullable=False),
+    StructField("CITY", StringType(), nullable=False),
+    StructField("ID", StringType(), nullable=False),
+    StructField("NAME", StringType(), nullable=False),
+    StructField("REPDTE", StringType(), nullable=True),
+    StructField("STNAME", StringType(), nullable=False),
+    StructField("WEBADDR", StringType(), nullable=True)
+])
+financialsSchema = StructType([
+    StructField("ASSET", StringType(), nullable=False),
+    StructField("CERT", StringType(), nullable=False),
+    StructField("DEP", StringType(), nullable=False),
+    StructField("ID", StringType(), nullable=False),
+    StructField("REPDTE", StringType(), nullable=False)
+])
 
 
 # Access data as dataframe for validation, selection, standardization [vss]
 # noinspection SpellCheckingInspection
 class BronzeDFs:
     @staticmethod
-    def bank_inst(): return spark.read.parquet(f"{s3_devpt_url}/bronze/institutions")
+    def bank_inst(): return spark.read.schema(institutionSchema).parquet(f"{s3_devpt_url}/bronze/institutions")
 
     @staticmethod
-    def bank_fin(): return spark.read.parquet(f"{s3_devpt_url}/bronze/financials")
+    def bank_fin(): return spark.read.schema(financialsSchema).parquet(f"{s3_devpt_url}/bronze/financials")
 
     @staticmethod
     def cu_foicu(): return spark.read.parquet(f"{s3_devpt_url}/bronze/foicu")

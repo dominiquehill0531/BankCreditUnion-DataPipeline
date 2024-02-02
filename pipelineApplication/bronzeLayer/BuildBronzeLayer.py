@@ -1,14 +1,28 @@
+"""
+Script code for persisting Bronze layer (unstructured) data to the datastore.
+
+Contains:
+    rscDirPath: str - Path to manual temp folder.
+    s3_devpt_url: str - URL to development s3 storage bucket.
+    df_from_json() - Creates DataFrame from JSON resource.
+    inst_df_to_s3() - Writes institutional bank data to S3.
+    fin_df_to_s3() - Writes financial bank data to S3.
+    csvfile_to_inferred_df() - Creates DataFrame from CSV resource.
+    foicu_to_s3() - Writes FOICU table credit union data to S3.
+    fs220_to_s3() - Writes  FS220 table credit union data to S3.
+    fs220d_to_s3() - Writes FS220D table credit union data to S3.
+    cred_data_to_s3() - Writes credit union data to S3.
+"""
 import os
 
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-from pyspark.sql.types import StructType, StructField, StringType
 
 from pipelineApplication.Helpers_FunctionsDicts import delete_downloaded_resources, write_bank_json_resources
 from pipelineApplication.bronzeLayer.BankData import inst_query, fin_query
 from pipelineApplication.bronzeLayer.CreditUnionData import download_cred_zips
-from pipelineApplication.bronzeLayer.DataRunParams import DataRunParams, increment_bank_params, currentDate
+from pipelineApplication.bronzeLayer.DataRunParams import DataRunParams
 
 aws_key_id = os.environ.get("AWS_KEY_ID")
 aws_secret_key = os.environ.get("AWS_SECRET_KEY")
@@ -39,49 +53,57 @@ logger.LogManager.getLogger("org.apache.spark.util.ShutdownHookManager").setLeve
 logger.LogManager.getLogger("org.apache.spark.SparkEnv").setLevel(logger.Level.ERROR)
 
 rscDirPath = "./resources"
+"""
+Relative path to a manual temporary folder that will be deleted at end of job stage.\n
+Accumulates data from HTTP responses.
+"""
 s3_devpt_url = "s3a://dhill-personal-devpt/alpharank-interview-pipeline"
 
-institutionSchema = StructType([
-    StructField("ACTIVE", StringType(), nullable=False),
-    StructField("CERT", StringType(), nullable=False),
-    StructField("CITY", StringType(), nullable=False),
-    StructField("ID", StringType(), nullable=False),
-    StructField("NAME", StringType(), nullable=False),
-    StructField("REPDTE", StringType(), nullable=True),
-    StructField("STNAME", StringType(), nullable=False),
-    StructField("WEBADDR", StringType(), nullable=True)
-])
 
+def df_from_json(json_path: str) -> DataFrame:
+    """
+    Creates DataFrame created from JSON resource at the given file path.
 
-def inst_df_from_resp(inst_json_path: str):
+    Args:
+        json_path: String file path to JSON data.
+
+    Returns:
+        DataFrame
+    """
     return spark.read \
-        .json(inst_json_path)
+        .json(json_path)
 
 
 def inst_df_to_s3(inst_df: DataFrame):
+    """
+    Writes given DataFrame to Amazon S3 bucket directory for bronze level institutional bank data as parquet files.
+
+    Args:
+        inst_df: DataFrame of institutional bank data.
+    """
     inst_df.write.parquet(f"{s3_devpt_url}/bronze/institutions", "append")
 
 
-financialsSchema = StructType([
-    StructField("ASSET", StringType(), nullable=False),
-    StructField("CERT", StringType(), nullable=False),
-    StructField("DEP", StringType(), nullable=False),
-    StructField("ID", StringType(), nullable=False),
-    StructField("REPDTE", StringType(), nullable=False)
-])
-
-
-def fin_df_from_resp(fin_json_path: str):
-    return spark.read \
-        .json(fin_json_path)
-
-
 def fin_df_to_s3(fin_df: DataFrame):
+    """
+    Writes given DataFrame to Amazon S3 bucket directory for bronze level financial bank data as parquet files.
+
+    Args:
+        fin_df: DataFrame of financial bank data.
+    """
     fin_df.write.parquet(f"{s3_devpt_url}/bronze/financials", "append")
 
 
-def csvfile_to_inferred_df(filepath):
-    """Caution: Infers schema from CSV file with header."""
+def csvfile_to_inferred_df(filepath: str) -> DataFrame:
+    """
+    Creates a DataFrame from CSV file at given file path, inferring the schema and a header.
+
+    Args:
+        filepath: String path to a CSV file.
+
+    Returns:
+        DataFrame
+    """
     return spark.read \
         .option("inferSchema", True) \
         .option("truncate", False) \
@@ -89,18 +111,40 @@ def csvfile_to_inferred_df(filepath):
 
 
 def foicu_to_s3(foicu_df: DataFrame):
+    """
+    Writes DataFrame of FOICU table in parquet to Amazon S3 bucket directory for bronze level credit union data.
+
+    Args:
+        foicu_df: DataFrame of credit union data.
+    """
     foicu_df.write.parquet(f"{s3_devpt_url}/bronze/foicu", "append")
 
 
 def fs220_to_s3(fs220_df: DataFrame):
+    """
+    Writes DataFrame of FS220 table in parquet to Amazon S3 bucket directory for bronze level credit union data.
+
+    Args:
+        fs220_df: DataFrame of credit union data.
+    """
     fs220_df.write.parquet(f"{s3_devpt_url}/bronze/fs220", "append")
 
 
 def fs220d_to_s3(fs220d_df: DataFrame):
+    """
+    Writes DataFrame of FS220D table in parquet to Amazon S3 bucket directory for bronze level credit union data.
+
+    Args:
+        fs220d_df: DataFrame of credit union data.
+    """
     fs220d_df.write.parquet(f"{s3_devpt_url}/bronze/fs220d", "append")
 
 
 def cred_data_to_s3():
+    """
+    Loops through each downloaded quarterly credit union report in the application's temp folder,
+    extracting selected data from various tables and persisting that data to its correlated directory in Amazon S3.
+    """
     for dirx in os.scandir(rscDirPath):
         qtr_report_dir = dirx.path
         foicu_df = csvfile_to_inferred_df(f"{qtr_report_dir}/FOICU.txt")
@@ -113,6 +157,10 @@ def cred_data_to_s3():
 
 
 def update_bronze_layer():
+    """
+    Creates and updates bronze data layer in S3 development bucket while managing the pipeline's
+    running parameters and the manual temp folder.
+    """
     rp = DataRunParams()
     os.mkdir(rscDirPath)
     while rp.certNumStop <= DataRunParams.maxCerts:
@@ -120,20 +168,20 @@ def update_bronze_layer():
         inst_resp = inst_query(rp.certNumStart, rp.certNumStop)
         write_bank_json_resources(inst_resp, rscDirPath, "inst")
         # Read and Write Bank Financials JSON
-        fin_resp = fin_query(rp.certNumStart, rp.certNumStop)
+        fin_resp = fin_query(rp, rp.certNumStart, rp.certNumStop)
         write_bank_json_resources(fin_resp, rscDirPath, "fin")
         # Increment bank data params
         print(f"Writing bank data for charter numbers {rp.certNumStart} through {rp.certNumStop}")
-        increment_bank_params(rp)
+        rp.increment_bank_params()
     # Upload Bank Data to S3
     print("Uploading institutional bank data")
-    inst_df = inst_df_from_resp(f"{rscDirPath}/inst.json") \
+    inst_df = df_from_json(f"{rscDirPath}/inst.json") \
         .select(f.json_tuple(f.to_json(f.col("data")),
                              "ACTIVE", "CERT", "CITY", "ID", "NAME", "REPDTE", "STNAME", "WEBADDR")) \
         .toDF("ACTIVE", "CERT", "CITY", "ID", "NAME", "REPDTE", "STNAME", "WEBADDR")
     inst_df_to_s3(inst_df)
     print("Uploading financial bank data")
-    fin_df = fin_df_from_resp(f"{rscDirPath}/fin.json") \
+    fin_df = df_from_json(f"{rscDirPath}/fin.json") \
         .select(f.json_tuple(f.to_json(f.col("data")),
                              "ASSET", "CERT", "DEP", "ID", "REPDTE")) \
         .toDF("ASSET", "CERT", "DEP", "ID", "REPDTE")
@@ -142,27 +190,10 @@ def update_bronze_layer():
     delete_downloaded_resources()
     os.mkdir(rscDirPath)
     # Read and Write Credit Union Data to S3
-    download_cred_zips(rscDirPath)  # increments credit union data params
+    download_cred_zips(rscDirPath, rp)  # increments credit union data params
     cred_data_to_s3()
     delete_downloaded_resources()
-    # Increment run params
-    DataRunParams.prevRun = currentDate
-    print(f"Setting previous run date to today's date, and exiting...")
-
-
-def testing():
-    os.mkdir(rscDirPath)
-    # Read and Write Bank Institutions
-    inst_resp = inst_query()
-    write_bank_json_resources(inst_resp, rscDirPath, "inst")
-    inst_df = inst_df_from_resp(f"{rscDirPath}/inst.json") \
-        .select(f.json_tuple(f.to_json(f.col("data")),
-                             "ACTIVE", "CERT", "DEP", "ID", "NAME", "REPDTE", "STNAME", "WEBADDR")) \
-        .toDF("ACTIVE", "CERT", "CITY", "ID", "NAME", "REPDTE", "STNAME", "WEBADDR")
-    # Read and Write Bank Financials
-    fin_resp = fin_query()
-    write_bank_json_resources(fin_resp, rscDirPath, "fin")
-    fin_df = fin_df_from_resp(f"{rscDirPath}/fin.json") \
-        .select(f.json_tuple(f.to_json(f.col("data")),
-                             "ASSET", "CERT", "DEP", "ID", "REPDTE")) \
-        .toDF("ASSET", "CERT", "DEP", "ID", "REPDTE")
+    # TODO: Add current run date to runLog.txt
+    with open("runLog.txt", "a") as runLog:
+        runLog.write(f"\n{rp.currentRun}")
+    print(f"Continuing to Silver Layer...")

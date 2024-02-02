@@ -13,7 +13,7 @@ Contains:
 import requests
 from requests import Response
 
-from pipelineApplication.bronzeLayer.DataRunParams import DataRunParams, currentDate
+from pipelineApplication.bronzeLayer.DataRunParams import DataRunParams
 
 # Setup API calls
 apiBaseURL = "https://banks.data.fdic.gov/api"
@@ -67,11 +67,12 @@ def inst_query(start_cert: int = 0, stop_cert: int = 9999) -> Response:
     return inst_req
 
 
-def fin_filters(start_cert: int = 0, stop_cert: int = 9999):
+def fin_filters(run_params: DataRunParams, start_cert: int = 0, stop_cert: int = 9999):
     """
    Creates string for use in dict of filter parameters for API financial query.
 
    Args:
+       run_params: DataRunParams object managing parameters of the data pipeline job.
        start_cert: Integer representing the charter number from which to start the FDIC query.
        stop_cert: Integer representing the charter number with which to end the FDIC query.
 
@@ -79,14 +80,15 @@ def fin_filters(start_cert: int = 0, stop_cert: int = 9999):
         String used in FDIC API query to designate range of charter numbers to search.
    """
     return (f"CERT:[{start_cert} TO {stop_cert}] AND "
-            f"REPDTE:[{DataRunParams.prevRun} TO {currentDate}]")
+            f"REPDTE:[{run_params.prevRun} TO {run_params.currentRun}]")
 
 
-def fin_query(start_cert: int = 0, stop_cert: int = 9999):
+def fin_query(run_params: DataRunParams, start_cert: int = 0, stop_cert: int = 9999):
     """
     Builds and sends GET request to FDIC API for financial data in JSON format.
 
     Args:
+        run_params: DataRunParams object managing parameters of the data pipeline job.
         start_cert: Integer representing the charter number from which to start the FDIC query.
         stop_cert: Integer representing the charter number with which to end the FDIC query.
 
@@ -97,7 +99,7 @@ def fin_query(start_cert: int = 0, stop_cert: int = 9999):
         RuntimeError if API response status code is not 200, successful.
     """
     fin_fields = "CERT,REPDTE,ASSET,DEP"
-    fin_params = {'filters': fin_filters(start_cert, stop_cert),
+    fin_params = {'filters': fin_filters(run_params, start_cert, stop_cert),
                   'fields': fin_fields,
                   'sort_by': 'CERT',
                   'sort_order': 'ASC',

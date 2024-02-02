@@ -2,6 +2,7 @@
 Functions and dicts used throughout the pipeline application that are not exclusive to any one layer or file.
 
 Contains:
+    moNumQtrs: dict - Correlates month number to financial quarter number. \n
     qtrMoNums: dict - Correlates financial quarter key ("Q#") to number of month value string ("MM").\n
     dateToQtrDict: dict - Correlates financial quarter end dates ("MM-DD") to quarter number value string ("#").\n
     write_bank_json_resources() - Writes temp JSON files.\n
@@ -22,6 +23,10 @@ from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.udf import UserDefinedFunction
 from requests import Response
 
+moNumQtrs = {1 | 2 | 3: 1,
+             4 | 5 | 6: 2,
+             7 | 8 | 9: 3,
+             10 | 11 | 12: 4}
 qtrMoNums = {"Q1": "03",
              "Q2": "06",
              "Q3": "09",
@@ -68,6 +73,7 @@ def value_via_dict(mapping_broadcasted: Broadcast) -> UserDefinedFunction:
     Returns:
         User-defined function returning values based on a given dict and column values as keys.
     """
+
     def g(x):
         return mapping_broadcasted.value.get(x)
 
@@ -86,6 +92,7 @@ def select_sort_dated_cols(df: DataFrame, first_cols: list[str | Column], sort_d
     Returns:
         DataFrame with selected unsorted columns trailed by sorted columns.
     """
+
     def g():
         rem_cols: list[str] = []
         for col in df.columns:

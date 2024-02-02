@@ -1,27 +1,59 @@
 """
+Code managing the parameters for each run of the data pipeline.
 
+Contains:
+    runLog: list[str] - list of strings derived from text document log of previous run date strings.
+    DataRunParams class definition and custom initialization logic.
 """
 
 from datetime import datetime
 
-currentDate = datetime.today().strftime('%Y-%m-%d')
-prevRunStr = "2023-06-30"  # Currently set for development testing
-# prevRunStr = [Get from pipelineApplication/runLog.txt]
-currentMo = datetime.today().strftime('%m')
+from pipelineApplication.Helpers_FunctionsDicts import moNumQtrs
+
+runLog = open("runLog.txt", "r")
 
 
-class DataRunParams:  # TODO: Create runLog file to autoincrement defaults
+class DataRunParams:
+    """
+    A class representing an object that holds and manages parameters for each run of data pipeline.
+
+    Attributes:
+        currentRun: String of current date in format '%Y-%m-%d'.
+        prevRun: String of date of last job run in format '%Y-%m-%d'.
+        qtrYear: Integer value of the year of the previous run.
+        qtr: Integer value of the month of the previous run.
+        certNumStart: Integer starting value for HTTP-requesting bank data by certification number.
+        certNumStop: Integer ending value for HTTP-requesting bank data by certification number.
+        maxCerts: Integer maximum value for HTTP-requesting bank data by certification number.
+    """
     # Default changes with each run
-    currentRun = currentDate
-    prevRun = prevRunStr
-    qtrYear = 2023
-    qtr = 1
+    currentRun: str
+    prevRun: str
+    qtrYear: int
+    qtr: int
     # Default remains
-    certNumStart = 0
-    certNumStop = 9999
-    maxCerts = 100000  # No more than 100K Bank certs
+    certNumStart: int = 0
+    certNumStop: int = 9999
+    maxCerts: int = 100000  # No more than 100K Bank certs
 
-    def to_str(self):
+    def __init__(self):
+        """
+        Constructs all dynamic attributes of the DataRunParams object without constant default values.
+        """
+        self.currentRun = datetime.today().strftime('%Y-%m-%d')
+        self.prevRun = runLog.readlines()[-1]
+        prev_run_date = datetime.strptime(self.prevRun, '%Y-%m-%d')
+        self.qtrYear = int(prev_run_date.strftime('%Y'))
+        self.qtr = moNumQtrs.get(int(prev_run_date.strftime('%m')))
+        runLog.close()
+
+    def to_str(self) -> str:
+        """
+        Prints string listing current values of DataRunParams object attributes for development purposes.
+
+        Returns:
+            String of attribute values.
+        """
         return (f"currentRun: {self.currentRun}\n"
                 f"prevRun: {self.prevRun}\n"
                 f"certNumStart: {self.certNumStart}\n"
@@ -30,35 +62,20 @@ class DataRunParams:  # TODO: Create runLog file to autoincrement defaults
                 f"qtrYear: {self.qtrYear}\n"
                 f"qtr: {self.qtr}\n")
 
+    def increment_bank_params(self):
+        """
+        Increments select attribute values needed for querying FDIC bank data API.
+        """
+        print("Proceeding to next 10000 bank charter numbers...")
+        self.certNumStart += 10000
+        self.certNumStop += 10000
 
-def increment_bank_params(run_params: DataRunParams):
-    print("Proceeding to next 10000 bank charter numbers...")
-    run_params.certNumStart += 10000
-    run_params.certNumStop += 10000
-
-
-def increment_cred_params():
-    if DataRunParams.qtr == 4:
-        DataRunParams.qtr = 1
-        DataRunParams.qtrYear += 1
-    else:
-        DataRunParams.qtr += 1
-
-
-def print_data_run_params_class():
-    return print(f"currentRun: {DataRunParams.currentRun}\n"
-                 f"prevRun: {DataRunParams.prevRun}\n"
-                 f"certNumStart: {DataRunParams.certNumStart}\n"
-                 f"certNumStop: {DataRunParams.certNumStop}\n"
-                 f"maxCerts: {DataRunParams.maxCerts}\n"
-                 f"qtrYear: {DataRunParams.qtrYear}\n"
-                 f"qtr: {DataRunParams.qtr}\n")
-
-
-def dev_reset_params():
-    DataRunParams.currentRun = currentDate
-    DataRunParams.prevRun = "2023-06-30"
-    DataRunParams.certNumStart = 0
-    DataRunParams.certNumStop = 9999
-    DataRunParams.qtrYear = 2023
-    DataRunParams.qtr = 1
+    def increment_cred_params(self):
+        """
+        Increments select attribute values needed to request and process credit union data reports from the NCUA.
+        """
+        if self.qtr == 4:
+            self.qtr = 1
+            self.qtrYear += 1
+        else:
+            self.qtr += 1

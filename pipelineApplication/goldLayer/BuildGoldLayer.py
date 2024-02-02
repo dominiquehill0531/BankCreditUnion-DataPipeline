@@ -129,14 +129,16 @@ class TableDataDFs:
     def quarterly_assets_table(): return select_sort_dated_cols(
         compile_quarterly_assets_table(),
         ["charter_number", "institution_type", "name"],
-        True)
+        True) \
+        .dropna()
 
     # Explore Deposits over Time
     @staticmethod
     def quarterly_deposits_table(): return select_sort_dated_cols(
         compile_quarterly_deposits_table(),
         ["charter_number", "institution_type", "name"],
-        True)
+        True) \
+        .dropna()
 
 
 def update_gold_layer():
@@ -161,5 +163,5 @@ def update_gold_layer():
         .mode("overwrite") \
         .option("overwriteSchema", True) \
         .save(f"{s3_devpt_url}/gold/quarterly_deposits_table")
-    print("Gold layer date ready for tables.")
+    print("Gold layer data ready for tables.")
 
