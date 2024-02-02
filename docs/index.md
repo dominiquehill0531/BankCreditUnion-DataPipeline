@@ -28,7 +28,6 @@ From the command line, in the pipeline project's top level directory, enter:
             BuildBronzeLayer.py             # Code that implements the building of the Bronze layer data in S3.
             CreditUnionData.py              # Code to download and extract NCUA credit union data.
             DataRunParams.py                # Code managing the parameters for each run of the data pipeline.
-            runLog.txt                      # Log listing dates of previous runs from least to most recent.
         goldLayer/                      # Folder of code for constructing the pipeline's Gold layer.
             BuildGoldLayer.py
         silverLayer/                    # Folder of code for constructing the pipeline's Silver layer.
@@ -41,3 +40,4 @@ From the command line, in the pipeline project's top level directory, enter:
     mkdocs.yml                          # The documentation configuration file.
     pipeline1.py
     requirements.txt
+    runLog.txt                      # Log listing dates of previous runs from least to most recent.
