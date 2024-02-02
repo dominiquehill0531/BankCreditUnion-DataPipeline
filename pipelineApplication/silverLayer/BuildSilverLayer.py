@@ -90,7 +90,9 @@ def vss_bank_inst(bank_inst_df: DataFrame):
                         "yyyy-MM-dd"
                     )) \
         .withColumn("state", F.initcap(F.col("STNAME"))) \
-        .withColumn("website", F.lower(F.col("WEBADDR"))).fillna("Not Provided", "website") \
+        .withColumn("website", F.lower(F.col("WEBADDR"))) \
+        .fillna("Not Provided", "website") \
+        .replace("", "Not Provided", ["website"]) \
         .drop("ACTIVE", "CERT", "CITY", "NAME", "ID", "REPDTE", "STNAME", "WEBADDR")
     return new_df
 
@@ -158,6 +160,7 @@ def vss_fs220d(fs220d_df: DataFrame):
                         "yyyy-MM-dd"
                     )) \
         .withColumn("website", F.lower(F.col("Acct_891"))).fillna("Not Provided", "website") \
+        .replace("", "Not Provided", ["website"]) \
         .drop("CYCLE_DATE", "Acct_891")
     return new_df
 
