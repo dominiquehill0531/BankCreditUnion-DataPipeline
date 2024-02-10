@@ -92,7 +92,6 @@ def select_sort_dated_cols(df: DataFrame, first_cols: list[str | Column], sort_d
     Returns:
         DataFrame with selected unsorted columns trailed by sorted columns.
     """
-
     def g():
         rem_cols: list[str] = []
         for col in df.columns:

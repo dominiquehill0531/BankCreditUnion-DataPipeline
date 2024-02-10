@@ -1,4 +1,7 @@
-states = {
+"""
+Module containing dictionary correlating abbreviations as keys ot the full name of the state as the value.
+"""
+states: dict[str, str] = {
     'AK': 'Alaska',
     'AL': 'Alabama',
     'AR': 'Arkansas',
@@ -54,3 +57,6 @@ states = {
     'WV': 'West Virginia',
     'WY': 'Wyoming'
 }
+"""
+Dictionary correlating abbreviations as keys ot the full name of the state as the value.
+"""

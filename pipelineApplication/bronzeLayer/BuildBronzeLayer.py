@@ -1,5 +1,5 @@
 """
-Script code for persisting Bronze layer (unstructured) data to the datastore.
+Script code for persisting raw Bronze layer data to S3.
 
 Contains:
     rscDirPath: str - Path to manual temp folder.
@@ -58,6 +58,9 @@ Relative path to a manual temporary folder that will be deleted at end of job st
 Accumulates data from HTTP responses.
 """
 s3_devpt_url = "s3a://dhill-personal-devpt/alpharank-interview-pipeline"
+"""
+URL to development s3 storage bucket.
+"""
 
 
 def df_from_json(json_path: str) -> DataFrame:
