@@ -1,3 +1,16 @@
+"""
+Script code for persisting datasets to S3, prepared for analysis in Athena as Glue tables.
+
+Contains:
+    s3_devpt_url: str - URL to development S3 storage bucket.\n
+    silver_schema: StructType - Schema for DataFrame of cleaned dataset in S3 datalake.\n
+    silver_data() - Function reads in dataset from silver layer in S3 as DataFrame.\n
+    quarter_dates_df() - Function creates DataFrame listing unique dates within cleaned dataset.\n
+    compile_quarterly_assets_table() - Function creates DataFrame that lists each financial institution's total assets data by quarter.\n
+    compile_quarterly_deposits_table() - Function creates DataFrame that lists each financial institution's total deposits data by quarter.\n
+    TableDataDFs - Class containing methods that create DataFrames ready for analysis and cataloguing in Glue and Athena.\n
+    update_gold_layer() - Function persists datasets prepped for cataloguing as Glue tables to be analyzed in Athena.
+"""
 import os
 
 import pyspark.sql.functions as F
@@ -50,12 +63,24 @@ silver_schema = StructType([
 
 
 # Base and Helper DataFrames
-def silver_data():
+def silver_data() -> DataFrame:
+    """
+    Reads cleaned consolidated dataset persisted in S3 Silver layer as a DataFrame.
+
+    Returns:
+         DataFrame
+    """
     df = spark.read.schema(silver_schema).parquet(f"{s3_devpt_url}/silver")
     return df
 
 
-def quarter_dates_df():
+def quarter_dates_df() -> DataFrame:
+    """
+    Creates DataFrame consisting of one column of distinct dates in the dataset.
+
+    Returns:
+         DataFrame
+    """
     qd_df = silver_data() \
         .select("quarter_date") \
         .sort("quarter_date", ascending=False) \
@@ -64,7 +89,13 @@ def quarter_dates_df():
 
 
 # Compiles Table Datasets
-def compile_quarterly_assets_table():
+def compile_quarterly_assets_table() -> DataFrame:
+    """
+    Creates DataFrame that lists each financial institution's total assets data by quarter.
+
+    Returns:
+         DataFrame
+    """
     component_dfs: list[DataFrame] = []
     combo_df = silver_data().select("charter_number", "name", "institution_type")
     for qdr in quarter_dates_df().collect():
@@ -83,7 +114,13 @@ def compile_quarterly_assets_table():
     return combo_df
 
 
-def compile_quarterly_deposits_table():
+def compile_quarterly_deposits_table() -> DataFrame:
+    """
+    Creates DataFrame that lists each financial institution's total deposits data by quarter.
+
+    Returns:
+         DataFrame
+    """
     component_dfs: list[DataFrame] = []
     combo_df = silver_data().select("charter_number", "name", "institution_type")
     for qdr in quarter_dates_df().collect():
@@ -104,29 +141,53 @@ def compile_quarterly_deposits_table():
 
 # Final Table Datasets
 class TableDataDFs:
-    # Current Institution Listing by Type and Name
+    """
+    A class containing methods that create and return DataFrames ready for analysis and cataloguing in Glue and Athena.
+    """
+
     @staticmethod
-    def institutions_directory_by_type(): return silver_data() \
-        .select("name", "charter_number", "institution_type", "city", "state", "website") \
-        .repartition("institution_type", "name") \
-        .sortWithinPartitions("name") \
-        .distinct()
+    def institutions_directory_by_type() -> DataFrame:
+        """
+        Creates DataFrame of current operational institutions, optimized for analysis by type and name.
+
+        Returns:
+             DataFrame
+        """
+        return silver_data() \
+            .select("name", "charter_number", "institution_type", "city", "state", "website") \
+            .repartition("institution_type", "name") \
+            .sortWithinPartitions("name") \
+            .distinct()
 
     # Explore Assets and Deposits by State and Date
     @staticmethod
-    def assets_deposits_by_state(): return silver_data() \
-        .select("charter_number", "name", "state", "city", "assets_total", "deposits_total", "quarter_date") \
-        .withColumn("year", F.date_format("quarter_date", "yyyy").cast("integer").alias("year")) \
-        .withColumn("qtr_date", F.date_format("quarter_date", "MM-dd")) \
-        .replace(dateToQtrDict, subset=["qtr_date"]) \
-        .withColumn("quarter", F.col("qtr_date").cast("integer").alias("quarter")) \
-        .drop("qtr_date", "quarter_date") \
-        .sort("assets_total", ascending=False) \
-        .repartition("year", "quarter", "state")
+    def assets_deposits_by_state() -> DataFrame:
+        """
+       Creates DataFrame of financial data, optimized for analysis by date and state.
+
+       Returns:
+            DataFrame
+       """
+        return silver_data() \
+            .select("charter_number", "name", "state", "city", "assets_total", "deposits_total", "quarter_date") \
+            .withColumn("year", F.date_format("quarter_date", "yyyy").cast("integer").alias("year")) \
+            .withColumn("qtr_date", F.date_format("quarter_date", "MM-dd")) \
+            .replace(dateToQtrDict, subset=["qtr_date"]) \
+            .withColumn("quarter", F.col("qtr_date").cast("integer").alias("quarter")) \
+            .drop("qtr_date", "quarter_date") \
+            .sort("assets_total", ascending=False) \
+            .repartition("year", "quarter", "state")
 
     # Explore Assets over Time
     @staticmethod
-    def quarterly_assets_table(): return select_sort_dated_cols(
+    def quarterly_assets_table() -> DataFrame:
+        """
+        Creates DataFrame of current operational institutions listing out assets total by quarter.
+
+        Returns:
+            DataFrame
+        """
+        return select_sort_dated_cols(
         compile_quarterly_assets_table(),
         ["charter_number", "institution_type", "name"],
         True) \
@@ -134,7 +195,14 @@ class TableDataDFs:
 
     # Explore Deposits over Time
     @staticmethod
-    def quarterly_deposits_table(): return select_sort_dated_cols(
+    def quarterly_deposits_table():
+        """
+        Creates DataFrame of current operational institutions listing out deposits total by quarter.
+
+        Returns:
+            DataFrame
+        """
+        return select_sort_dated_cols(
         compile_quarterly_deposits_table(),
         ["charter_number", "institution_type", "name"],
         True) \
@@ -142,6 +210,9 @@ class TableDataDFs:
 
 
 def update_gold_layer():
+    """
+    Persists datasets prepped for cataloguing as Glue tables to be analyzed in Athena.
+    """
     print("Writing gold data layer table data ...")
     TableDataDFs.institutions_directory_by_type().write \
         .partitionBy("institution_type", "state") \
@@ -164,4 +235,3 @@ def update_gold_layer():
         .option("overwriteSchema", True) \
         .save(f"{s3_devpt_url}/gold/quarterly_deposits_table")
     print("Gold layer data ready for tables.")
-
