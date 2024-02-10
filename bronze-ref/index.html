@@ -421,6 +421,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#pipelineApplication.bronzeLayer.BuildBronzeLayer.s3_devpt_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      s3_devpt_url
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pipelineApplication.bronzeLayer.BuildBronzeLayer.cred_data_to_s3" class="md-nav__link">
     <span class="md-ellipsis">
       cred_data_to_s3
@@ -729,6 +738,15 @@
   <a href="#pipelineApplication.bronzeLayer.BuildBronzeLayer.rscDirPath" class="md-nav__link">
     <span class="md-ellipsis">
       rscDirPath
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pipelineApplication.bronzeLayer.BuildBronzeLayer.s3_devpt_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      s3_devpt_url
     </span>
   </a>
   
@@ -2236,7 +2254,7 @@ DataRunParams class definition and custom initialization logic.</p>
 <a id="pipelineApplication.bronzeLayer.BuildBronzeLayer"></a>
   <div class="doc doc-contents first">
   
-      <p>Script code for persisting Bronze layer (unstructured) data to the datastore.</p>
+      <p>Script code for persisting raw Bronze layer data to S3.</p>
 
 <details class="contains" open>
   <summary>Contains</summary>
@@ -2283,6 +2301,27 @@ cred_data_to_s3() - Writes credit union data to S3.</p>
 
 </div>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="pipelineApplication.bronzeLayer.BuildBronzeLayer.s3_devpt_url" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">s3_devpt_url</span> <span class="o">=</span> <span class="s1">&#39;s3a://dhill-personal-devpt/alpharank-interview-pipeline&#39;</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>URL to development s3 storage bucket.</p>
+  </div>
+
+</div>
+
 
 
 
@@ -2303,10 +2342,7 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
@@ -2316,7 +2352,10 @@ extracting selected data from various tables and persisting that data to its cor
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cred_data_to_s3</span><span class="p">():</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cred_data_to_s3</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loops through each downloaded quarterly credit union report in the application&#39;s temp folder,</span>
 <span class="sd">    extracting selected data from various tables and persisting that data to its correlated directory in Amazon S3.</span>
@@ -2407,10 +2446,7 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
@@ -2420,7 +2456,10 @@ extracting selected data from various tables and persisting that data to its cor
 <span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">csvfile_to_inferred_df</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">csvfile_to_inferred_df</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a DataFrame from CSV file at given file path, inferring the schema and a header.</span>
 
@@ -2511,10 +2550,7 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span>
@@ -2522,7 +2558,10 @@ extracting selected data from various tables and persisting that data to its cor
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
-<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">df_from_json</span><span class="p">(</span><span class="n">json_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">df_from_json</span><span class="p">(</span><span class="n">json_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates DataFrame created from JSON resource at the given file path.</span>
 
@@ -2587,14 +2626,14 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">90</span>
 <span class="normal">91</span>
 <span class="normal">92</span>
 <span class="normal">93</span>
-<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fin_df_to_s3</span><span class="p">(</span><span class="n">fin_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fin_df_to_s3</span><span class="p">(</span><span class="n">fin_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes given DataFrame to Amazon S3 bucket directory for bronze level financial bank data as parquet files.</span>
 
@@ -2655,14 +2694,14 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">foicu_to_s3</span><span class="p">(</span><span class="n">foicu_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">foicu_to_s3</span><span class="p">(</span><span class="n">foicu_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes DataFrame of FOICU table in parquet to Amazon S3 bucket directory for bronze level credit union data.</span>
 
@@ -2723,14 +2762,14 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span>
-<span class="normal">130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fs220_to_s3</span><span class="p">(</span><span class="n">fs220_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fs220_to_s3</span><span class="p">(</span><span class="n">fs220_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes DataFrame of FS220 table in parquet to Amazon S3 bucket directory for bronze level credit union data.</span>
 
@@ -2791,14 +2830,14 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fs220d_to_s3</span><span class="p">(</span><span class="n">fs220d_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fs220d_to_s3</span><span class="p">(</span><span class="n">fs220d_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes DataFrame of FS220D table in parquet to Amazon S3 bucket directory for bronze level credit union data.</span>
 
@@ -2859,14 +2898,14 @@ extracting selected data from various tables and persisting that data to its cor
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
-<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">inst_df_to_s3</span><span class="p">(</span><span class="n">inst_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">inst_df_to_s3</span><span class="p">(</span><span class="n">inst_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes given DataFrame to Amazon S3 bucket directory for bronze level institutional bank data as parquet files.</span>
 
@@ -2898,10 +2937,7 @@ running parameters and the manual temp folder.</p>
 
           <details class="quote">
             <summary>Source code in <code>pipelineApplication\bronzeLayer\BuildBronzeLayer.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
@@ -2938,7 +2974,10 @@ running parameters and the manual temp folder.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update_bronze_layer</span><span class="p">():</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update_bronze_layer</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates and updates bronze data layer in S3 development bucket while managing the pipeline&#39;s</span>
 <span class="sd">    running parameters and the manual temp folder.</span>
