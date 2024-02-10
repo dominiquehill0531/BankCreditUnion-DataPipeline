@@ -12,6 +12,11 @@ From the command line, in the pipeline project's top level directory, enter:
 
     python pipeline1.py
 
+which will run
+
+    BuildBronzeLayer.update_bronze_layer()
+    BuildSilverLayer.update_silver_layer()
+    BuildGoldLayer.update_gold_layer()
 
 ## Project Layout
 
@@ -29,15 +34,15 @@ From the command line, in the pipeline project's top level directory, enter:
             CreditUnionData.py              # Code to download and extract NCUA credit union data.
             DataRunParams.py                # Code managing the parameters for each run of the data pipeline.
         goldLayer/                      # Folder of code for constructing the pipeline's Gold layer.
-            BuildGoldLayer.py
+            BuildGoldLayer.py               # Code that implements the building of the Gold layer data in S3.
         silverLayer/                    # Folder of code for constructing the pipeline's Silver layer.
-            BuildSilverLayer.py
-            StateAbbreviationDict.py
+            BuildSilverLayer.py             # Code that implements the building of the Silver layer data in S3.
+            StateAbbreviationDict.py        # A single dictionary mapping state names to their abbreviations.
         Helpers_FunctionsDicts.py           # Code for helper functions and dictionaries.
     sparkLogs/                      # Folder of run logs produced by Spark Session.
     tests/                          # Folder of tests.
-        test_Pyspark.py
-    mkdocs.yml                          # The documentation configuration file.
-    pipeline1.py
-    requirements.txt
+        test_Pyspark.py                 #  
+    mkdocs.yml                      # The documentation configuration file.
+    pipeline1.py                    # Data pipeline script.
+    requirements.txt                # Lists package dependencies.
     runLog.txt                      # Log listing dates of previous runs from least to most recent.
